@@ -9,6 +9,8 @@ To allow concurred shared access to data every key is behind a
 #### simple example
 ```rust
 fn main() {
+    use diskmap::DiskMap;
+
     let d: DiskMap<String, i32> = DiskMap::open_new("/tmp/db").unwrap();
 
     d.insert("a".to_owned(), 12000).unwrap();
@@ -26,6 +28,8 @@ fn main() {
 #### complex example
 ```rust
 fn main() {
+    use diskmap::DiskMap;
+
     let d: DiskMap<String, i32> = DiskMap::open_new("/tmp/db").unwrap();
 
     d.insert("a".to_owned(), 1).unwrap();
@@ -54,3 +58,4 @@ fn main() {
     // one colliding with the other
 }
 ```
+
