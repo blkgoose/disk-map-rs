@@ -163,11 +163,17 @@ where
     pub fn as_vec(&self) -> Result<Vec<(K, V)>, Error> {
         match self.get_keys() {
             Err(e) => Err(e),
-            Ok(keys) => Ok(keys
-                .clone()
-                .iter()
-                .map(|k| (k.clone(), self.get(k).unwrap()))
-                .collect::<Vec<(K, V)>>()),
+            Ok(keys) => {
+                let mut v = vec![];
+
+                for key in keys {
+                    let val = self.get(&key)?;
+
+                    v.push((key, val));
+                }
+
+                Ok(v)
+            }
         }
     }
 
@@ -176,7 +182,7 @@ where
             Err(e) => Err(e),
             Ok(keys) => {
                 for key in keys.iter() {
-                    self.delete(key).unwrap();
+                    self.delete(key)?;
                 }
                 Ok(())
             }
