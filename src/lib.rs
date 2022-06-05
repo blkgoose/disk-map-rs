@@ -128,6 +128,23 @@ where
         }
     }
 
+    pub fn overwrite(&self, key: K, value: V) -> Result<(), Error> {
+        let fname = self.filename(&key);
+
+        let lfile = File::open(&fname).unwrap();
+        lfile.lock(FileLockMode::Exclusive).ok();
+
+        let file = OpenOptions::new().write(true).truncate(true).open(fname);
+
+        match file {
+            Err(_) => Err(Error::CannotOpenFile),
+            Ok(f) => match serde_cbor::to_writer(f, &value) {
+                Err(_) => Err(Error::CannotAlterFile),
+                Ok(_) => Ok(()),
+            },
+        }
+    }
+
     pub fn get_keys(&self) -> Result<Vec<K>, Error> {
         match read_dir(&self.directory) {
             Ok(c) => {
