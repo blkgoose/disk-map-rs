@@ -120,7 +120,7 @@ where
                 }
                 Err(_) => Err(Error::CannotGetLock),
             },
-            Err(_) => Err(Error::CannotGetLock),
+            Err(_) => Err(Error::CannotOpenFile),
         }
     }
 
@@ -151,7 +151,7 @@ where
                 }
                 Err(_) => Err(Error::CannotGetLock),
             },
-            Err(_) => Err(Error::CannotGetLock),
+            Err(_) => Err(Error::CannotOpenFile),
         }
     }
 
