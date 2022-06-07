@@ -105,17 +105,22 @@ where
 
         let fname = self.filename(&key);
 
-        let lfile = File::open(&fname).unwrap();
-        lfile.lock(FileLockMode::Exclusive).ok();
+        match File::open(&fname) {
+            Ok(lfile) => match lfile.lock(FileLockMode::Exclusive) {
+                Ok(_) => {
+                    let file = OpenOptions::new().write(true).truncate(true).open(fname);
 
-        let file = OpenOptions::new().write(true).truncate(true).open(fname);
-
-        match file {
-            Err(_) => Err(Error::CannotOpenFile),
-            Ok(f) => match serde_cbor::to_writer(f, &alter_function(v)) {
-                Err(_) => Err(Error::CannotAlterFile),
-                Ok(v) => Ok(v),
+                    match file {
+                        Err(_) => Err(Error::CannotOpenFile),
+                        Ok(f) => match serde_cbor::to_writer(f, &alter_function(v)) {
+                            Err(_) => Err(Error::CannotAlterFile),
+                            Ok(_) => Ok(()),
+                        },
+                    }
+                }
+                Err(_) => Err(Error::CannotGetLock),
             },
+            Err(_) => Err(Error::CannotGetLock),
         }
     }
 
@@ -131,17 +136,22 @@ where
     pub fn overwrite(&self, key: K, value: V) -> Result<(), Error> {
         let fname = self.filename(&key);
 
-        let lfile = File::open(&fname).unwrap();
-        lfile.lock(FileLockMode::Exclusive).ok();
+        match File::open(&fname) {
+            Ok(lfile) => match lfile.lock(FileLockMode::Exclusive) {
+                Ok(_) => {
+                    let file = OpenOptions::new().write(true).truncate(true).open(fname);
 
-        let file = OpenOptions::new().write(true).truncate(true).open(fname);
-
-        match file {
-            Err(_) => Err(Error::CannotOpenFile),
-            Ok(f) => match serde_cbor::to_writer(f, &value) {
-                Err(_) => Err(Error::CannotAlterFile),
-                Ok(_) => Ok(()),
+                    match file {
+                        Err(_) => Err(Error::CannotOpenFile),
+                        Ok(f) => match serde_cbor::to_writer(f, &value) {
+                            Err(_) => Err(Error::CannotAlterFile),
+                            Ok(_) => Ok(()),
+                        },
+                    }
+                }
+                Err(_) => Err(Error::CannotGetLock),
             },
+            Err(_) => Err(Error::CannotGetLock),
         }
     }
 
