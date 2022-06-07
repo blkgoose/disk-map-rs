@@ -38,6 +38,7 @@ where
     K: PartialEq,
     K: Clone,
     V: Serialize + DeserializeOwned,
+    V: Clone,
 {
     fn filename(&self, key: &K) -> PathBuf {
         PathBuf::from(format!(
@@ -133,8 +134,8 @@ where
         }
     }
 
-    pub fn overwrite(&self, key: K, value: V) -> Result<(), Error> {
-        let fname = self.filename(&key);
+    pub fn overwrite_existing(&self, key: &K, value: V) -> Result<(), Error> {
+        let fname = self.filename(key);
 
         match File::open(&fname) {
             Ok(lfile) => match lfile.lock(FileLockMode::Exclusive) {
@@ -153,6 +154,11 @@ where
             },
             Err(_) => Err(Error::CannotOpenFile),
         }
+    }
+
+    pub fn overwrite(&self, key: &K, value: V) -> Result<(), Error> {
+        self.insert(key.clone(), value.clone())
+            .or_else(|_| self.overwrite_existing(key, value))
     }
 
     pub fn get_keys(&self) -> Result<Vec<K>, Error> {
